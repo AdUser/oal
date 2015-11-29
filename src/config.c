@@ -23,20 +23,24 @@ int parse_config(oal_config_t * const config, const char *file) {
 
   while (fgets(buf, bufsize, f)) {
     linenum++;
+    /* find start of key */
     key = buf;
     while (isspace(*key))
       key++;
     if (*key == '#')
       continue; /* ignore comments */
+    if (strlen(key) == 0)
+      continue; /* ignore empty lines */
     if (!isalpha(*key)) {
       snprintf(err, bufsize, "can't parse line %d", linenum);
       config->error = strdup(err);
       return 1;
     }
+    /* find start of value */
     value = key;
     while(*value && !isspace(*value))
       value++;
-    if (!isspace(value)) {
+    if (!isspace(*value)) {
       snprintf(err, bufsize, "can't find value at line %d", linenum);
       config->error = strndup(err, bufsize);
       return 1;
@@ -44,8 +48,18 @@ int parse_config(oal_config_t * const config, const char *file) {
     *value = '\0', value += 1;
     while (isspace(*value))
       value++;
+    if (!*value) {
+      snprintf(err, bufsize, "can't find value at line %d", linenum);
+      config->error = strndup(err, bufsize);
+      return 1;
+    }
+    /* strip trailing spaces and newline */
     valsize = strnlen(value, bufsize - (value - buf));
-
+    while (valsize && isspace(value[valsize - 1])) {
+      value[valsize - 1] = '\0';
+      valsize--;
+    }
+    /* check & copy valid keys */
     if (strncmp(key, "bindurls", 6) == 0) {
       config->bindurls = strndup(value, valsize);
     } else
