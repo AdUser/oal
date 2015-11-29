@@ -6,14 +6,12 @@
 
 #include "config.h"
 
-#define BUFSIZE 1024
-
 int parse_config(oal_config_t * const config, const char *file) {
   FILE *f;
-  const size_t bufsize = 1024;
+  enum { bufsize = 1024 };
   unsigned short linenum = 0;
-  char buf[BUFSIZE];
-  char err[BUFSIZE];
+  char buf[bufsize];
+  char err[bufsize];
   char *key, *value;
   size_t valsize;
 
@@ -23,7 +21,7 @@ int parse_config(oal_config_t * const config, const char *file) {
     return 1;
   }
 
-  while (fgets(buf, BUFSIZE, f)) {
+  while (fgets(buf, bufsize, f)) {
     linenum++;
     key = buf;
     while (isspace(*key))
