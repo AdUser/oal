@@ -86,5 +86,11 @@ OPENVPN_EXPORT void
 openvpn_plugin_close_v1 (openvpn_plugin_handle_t handle)
 {
   oal_config_t *config = (oal_config_t *) handle;
+  free(config->bindurls);
+  free(config->binddn);
+  free(config->bindpass);
+  free(config->basedn);
+  free(config->userfilter);
+  free(config->error);
   free(config);
 }
