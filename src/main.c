@@ -5,6 +5,7 @@
 #include <openvpn/openvpn-plugin.h>
 
 #include "config.h"
+#include "ldapauth.h"
 
 static const char *OAL_NAME = "openvpn-ldap-auth";
 
