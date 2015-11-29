@@ -1,16 +1,18 @@
-SET(CNAME "openvpn-auth-ldap")
-SET(VERSION 0.01)
+set(CNAME "openvpn-auth-ldap")
+set(VERSION 0.01)
 
-PROJECT(${CNAME} C)
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+project(${CNAME} C)
+cmake_minimum_required(VERSION 2.6)
 
-SET(CMAKE_INSTALL_PREFIX "/usr")
-SET(INSTALL_LIB "${CMAKE_INSTALL_PREFIX}/lib/openvpn")
+include(CTest)
 
-MESSAGE (STATUS "------------------------------------------")
-MESSAGE (STATUS "Build type is:        ${CMAKE_BUILD_TYPE}")
-MESSAGE (STATUS "")
-MESSAGE (STATUS "Install prefix:       ${CMAKE_INSTALL_PREFIX}")
-MESSAGE (STATUS "Library directory:    ${INSTALL_LIB}")
+set(CMAKE_INSTALL_PREFIX "/usr")
+set(INSTALL_LIB "${CMAKE_INSTALL_PREFIX}/lib/openvpn")
 
-ADD_SUBDIRECTORY (src)
+message(STATUS "------------------------------------------")
+message(STATUS "Build type is:        ${CMAKE_BUILD_TYPE}")
+message(STATUS "")
+message(STATUS "Install prefix:       ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "Library directory:    ${INSTALL_LIB}")
+
+add_subdirectory (src)
