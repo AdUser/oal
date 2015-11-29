@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #include <string.h>
@@ -14,6 +15,9 @@ int parse_config(oal_config_t * const config, const char *file) {
   char err[bufsize];
   char *key, *value;
   size_t valsize;
+
+  assert(config != NULL);
+  assert(file   != NULL);
 
   if ((f = fopen(file, "r")) == NULL) {
     snprintf(err, bufsize, "can't open file: %s", strerror(errno));
