@@ -6,6 +6,7 @@ typedef struct {
   char   *binddn;        /** bind as this user before search for user */
   char   *bindpass;      /** bind with this password */
   size_t  bindtimeout;   /** bind timeout */
+  short   referrals;     /** if > 0 - follow referals */
   char   *basedn;        /** where to search for users */
   char   *userfilter;    /** ldap filter for user entry */
   char   *error;         /** parser error */
