@@ -16,3 +16,4 @@ message(STATUS "Install prefix:       ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "Library directory:    ${INSTALL_LIB}")
 
 add_subdirectory (src)
+add_subdirectory (tests)
