@@ -9,6 +9,8 @@ include(CTest)
 set(CMAKE_INSTALL_PREFIX "/usr")
 set(INSTALL_LIB "${CMAKE_INSTALL_PREFIX}/lib/openvpn")
 
+list(APPEND CMAKE_C_FLAGS "-Wall -Wextra -pedantic")
+
 message(STATUS "------------------------------------------")
 message(STATUS "Build type is:        ${CMAKE_BUILD_TYPE}")
 message(STATUS "")
