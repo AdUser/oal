@@ -94,3 +94,33 @@ int parse_config(oal_config_t * const config, const char *file) {
 
   return 0;
 }
+
+int check_config(oal_config_t * const config) {
+  enum { bufsize = 1024 };
+  char err[bufsize] = { '\0' };
+
+  assert(config != NULL);
+
+  if (!config->bindurls) {
+    snprintf(err, bufsize, "'bindurls' not set in config");
+    goto error;
+  }
+  if (!config->basedn) {
+    snprintf(err, bufsize, "'basedn' not set in config");
+    goto error;
+  }
+  if (!config->userfilter) {
+    snprintf(err, bufsize, "'userfilter' not set in config");
+    goto error;
+  }
+  if (config->binddn && !config->bindpass) {
+    snprintf(err, bufsize, "'bindn' set, but 'bindpass' missing in config");
+    goto error;
+  }
+
+  return 0;
+
+  error:
+  config->error = strndup(err, bufsize);
+  return 1;
+}

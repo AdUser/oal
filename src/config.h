@@ -13,5 +13,6 @@ typedef struct {
 } oal_config_t;
 
 int parse_config(oal_config_t * const config, const char *file);
+int check_config(oal_config_t * const config);
 
 #endif /* OAL_CONFIG_H_INCLUDED */
