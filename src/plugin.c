@@ -56,6 +56,11 @@ openvpn_plugin_open_v1 (unsigned int *type_mask,
     return NULL;
   }
 
+  if (check_config(config) != 0) {
+    fprintf(stderr, "config check failed: %s", config->error);
+    return NULL;
+  }
+
   *type_mask = OPENVPN_PLUGIN_MASK (OPENVPN_PLUGIN_AUTH_USER_PASS_VERIFY);
   return (openvpn_plugin_handle_t) config;
 }
