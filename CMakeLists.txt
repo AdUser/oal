@@ -11,11 +11,15 @@ set(INSTALL_LIB "${CMAKE_INSTALL_PREFIX}/lib/openvpn")
 
 list(APPEND CMAKE_C_FLAGS "-Wall -Wextra -pedantic")
 
+find_library(LIBLDAP NAMES "ldap")
+
 message(STATUS "------------------------------------------")
 message(STATUS "Build type is:        ${CMAKE_BUILD_TYPE}")
 message(STATUS "")
 message(STATUS "Install prefix:       ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "Library directory:    ${INSTALL_LIB}")
+message(STATUS "")
+message(STATUS "ldap:                 ${LIBLDAP}")
 
 add_subdirectory (src)
 add_subdirectory (tests)

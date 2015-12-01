@@ -4,6 +4,7 @@
 #include <string.h>
 #include <sys/time.h>
 
+#define LDAP_DEPRECATED 1
 #include <ldap.h>
 
 #include "config.h"
