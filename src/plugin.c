@@ -7,7 +7,7 @@
 #include "config.h"
 #include "ldapauth.h"
 
-static const char *OAL_NAME = "openvpn-ldap-auth";
+/* static const char *OAL_NAME = "openvpn-ldap-auth"; */
 
 /**
  * Given an environmental variable name, search
@@ -34,47 +34,45 @@ get_env (const char *name, const char *envp[]) {
   return NULL;
 }
 
-OPENVPN_EXPORT int openvpn_plugin_min_version_required_v1(void)
-{
-  return 3;
-}
-
 OPENVPN_EXPORT int
-openvpn_plugin_open_v3 (const int v3structver,
-                        struct openvpn_plugin_args_open_in const *args,
-                        struct openvpn_plugin_args_open_return *ret)
+openvpn_plugin_min_version_required_v1(void) { return 1; }
+
+OPENVPN_EXPORT openvpn_plugin_handle_t
+openvpn_plugin_open_v1 (unsigned int *type_mask,
+                        const char *argv[],
+                        const char *envp[])
 {
   oal_config_t *config;
 
-  if (v3structver != OPENVPN_PLUGINv3_STRUCTVER)
-    return OPENVPN_PLUGIN_FUNC_ERROR;
+  if (!argv[1]) {
+    fprintf(stderr, "no config provided");
+    return NULL;
+  }
 
   config = (oal_config_t *) calloc (1, sizeof (oal_config_t));
 
-  if (parse_config(config, args->argv[0]) != 0) {
-    args->callbacks->plugin_log(PLOG_ERR, OAL_NAME,
-      "config parser failed: %s", config->error);
-    return OPENVPN_PLUGIN_FUNC_ERROR;
+  if (parse_config(config, argv[1]) != 0) {
+    fprintf(stderr, "config parser failed: %s", config->error);
+    return NULL;
   }
 
-  ret->type_mask = OPENVPN_PLUGIN_MASK (OPENVPN_PLUGIN_AUTH_USER_PASS_VERIFY);
-  ret->handle    = (void *) config;
-
-  return OPENVPN_PLUGIN_FUNC_SUCCESS;
+  *type_mask = OPENVPN_PLUGIN_MASK (OPENVPN_PLUGIN_AUTH_USER_PASS_VERIFY);
+  return (openvpn_plugin_handle_t) config;
 }
 
 OPENVPN_EXPORT int
-openvpn_plugin_func_v3 (const int version,
-                        struct openvpn_plugin_args_func_in const *args,
-                        struct openvpn_plugin_args_func_return *retptr)
+openvpn_plugin_func_v1 (openvpn_plugin_handle_t handle,
+                        const int type,
+                        const char *argv[],
+                        const char *envp[])
 {
-  oal_config_t *config = (oal_config_t *) args->handle;
+  oal_config_t *config = (oal_config_t *) handle;
 
   /* get username/password from envp string array */
-  const char *username = get_env("username", args->envp);
-  const char *password = get_env("password", args->envp);
+  const char *username = get_env("username", envp);
+  const char *password = get_env("password", envp);
 
-  if (args->type == OPENVPN_PLUGIN_AUTH_USER_PASS_VERIFY) {
+  if (type == OPENVPN_PLUGIN_AUTH_USER_PASS_VERIFY) {
     /* check entered username/password against what we require */
     if (check_against_ldap(config, username, password) == 0)
       return OPENVPN_PLUGIN_FUNC_SUCCESS;
