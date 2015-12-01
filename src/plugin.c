@@ -72,6 +72,7 @@ openvpn_plugin_func_v1 (openvpn_plugin_handle_t handle,
                         const char *envp[])
 {
   oal_config_t *config = (oal_config_t *) handle;
+  short int rc = 0;
 
   /* get username/password from envp string array */
   const char *username = get_env("username", envp);
@@ -79,11 +80,17 @@ openvpn_plugin_func_v1 (openvpn_plugin_handle_t handle,
 
   if (type == OPENVPN_PLUGIN_AUTH_USER_PASS_VERIFY) {
     /* check entered username/password against what we require */
-    if (check_against_ldap(config, username, password) == 0)
-      return OPENVPN_PLUGIN_FUNC_SUCCESS;
+    rc = oal_check_cred(config, username, password);
+    switch (rc) {
+      case 1 : return OPENVPN_PLUGIN_FUNC_SUCCESS; break;
+      case 0 : return OPENVPN_PLUGIN_FUNC_ERROR;   break;
+      default :
+        fprintf(stderr, "auth error: %s", config->error);
+        break;
+    }
   }
 
-  return OPENVPN_PLUGIN_FUNC_ERROR;
+  return OPENVPN_PLUGIN_FUNC_ERROR; /* never reached */
 }
 
 OPENVPN_EXPORT void
