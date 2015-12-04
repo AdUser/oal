@@ -6,7 +6,9 @@
 #include "ldapauth.h"
 
 int main(int argc, char *argv[]) {
-  char buf[1024];
+  char buf[128];
+  char username[32];
+  char password[32];
   oal_config_t *config;
 
   if (argc < 2) {
@@ -27,7 +29,16 @@ int main(int argc, char *argv[]) {
   }
 
   while (fgets(buf, sizeof(buf), stdin) != NULL) {
-    ;
+    if (sscanf(buf, "%31s %31s", username, password) != 2) {
+      fputs("fail: expected '<username> <password>' line\n", stdout);
+      continue;
+    }
+    if (oal_check_cred(config, username, password) == 0) {
+      fputs("ok\n", stdout);
+    } else {
+      fprintf(stderr, "fail: %s\n", config->error);
+      free(config->error);
+    }
   }
 
   free(config);
