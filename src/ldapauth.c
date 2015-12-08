@@ -14,11 +14,11 @@
  * @brief  escape chars, having special meaning in ldap search filter
  * @returns >= 0 if escaped successfully, -1 on error
  */
-size_t
+ssize_t
 oal_ldap_escape(char *dst, size_t size, const char *src)
 {
   char c = '\0';
-  size_t pos = 0;
+  ssize_t pos = 0;
 
   assert(dst != NULL);
   assert(src != NULL);
