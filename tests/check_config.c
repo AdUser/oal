@@ -6,7 +6,7 @@
 #include "../src/config.h"
 
 #define STEAL(attr) \
-  stealed = config.attr, config.attr = NULL, config.error = NULL; \
+  stealed = config.attr, config.attr = NULL, config.error[0] = '\0'; \
   assert(check_config(&config) > 0); \
   assert(config.error != NULL); \
   config.attr = stealed

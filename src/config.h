@@ -9,7 +9,7 @@ typedef struct {
   short   referrals;     /** if > 0 - follow referals */
   char   *basedn;        /** where to search for users */
   char   *userfilter;    /** ldap filter for user entry */
-  char   *error;         /** parser error */
+  char    error[1024];   /** parser error */
 } oal_config_t;
 
 int parse_config(oal_config_t * const config, const char *file);

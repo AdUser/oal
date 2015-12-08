@@ -7,12 +7,12 @@
 
 #include "config.h"
 
+enum { bufsize = 1024 };
+
 int parse_config(oal_config_t * const config, const char *file) {
   FILE *f;
-  enum { bufsize = 1024 };
   unsigned short linenum = 0;
   char buf[bufsize];
-  char err[bufsize];
   char *key, *value;
   size_t valsize;
 
@@ -20,8 +20,7 @@ int parse_config(oal_config_t * const config, const char *file) {
   assert(file   != NULL);
 
   if ((f = fopen(file, "r")) == NULL) {
-    snprintf(err, bufsize, "can't open file: %s", strerror(errno));
-    config->error = strndup(err, bufsize);
+    snprintf(config->error, sizeof(config->error), "can't open file: %s", strerror(errno));
     return 1;
   }
 
@@ -36,8 +35,7 @@ int parse_config(oal_config_t * const config, const char *file) {
     if (strlen(key) == 0)
       continue; /* ignore empty lines */
     if (!isalpha(*key)) {
-      snprintf(err, bufsize, "can't parse line %d", linenum);
-      config->error = strdup(err);
+      snprintf(config->error, sizeof(config->error), "can't parse line %d", linenum);
       return 1;
     }
     /* find start of value */
@@ -45,16 +43,14 @@ int parse_config(oal_config_t * const config, const char *file) {
     while(*value && !isspace(*value))
       value++;
     if (!isspace(*value)) {
-      snprintf(err, bufsize, "can't find value at line %d", linenum);
-      config->error = strndup(err, bufsize);
+      snprintf(config->error, sizeof(config->error), "can't find value at line %d", linenum);
       return 1;
     }
     *value = '\0', value += 1;
     while (isspace(*value))
       value++;
     if (!*value) {
-      snprintf(err, bufsize, "can't find value at line %d", linenum);
-      config->error = strndup(err, bufsize);
+      snprintf(config->error, sizeof(config->error), "can't find value at line %d", linenum);
       return 1;
     }
     /* strip trailing spaces and newline */
@@ -86,8 +82,7 @@ int parse_config(oal_config_t * const config, const char *file) {
       config->userfilter = strndup(value, valsize);
     } else
     {
-      snprintf(err, bufsize, "unknown key '%s' at line %d", key, linenum);
-      config->error = strndup(err, bufsize);
+      snprintf(config->error, sizeof(config->error), "unknown key '%s' at line %d", key, linenum);
       return 1;
     }
   }
@@ -96,31 +91,24 @@ int parse_config(oal_config_t * const config, const char *file) {
 }
 
 int check_config(oal_config_t * const config) {
-  enum { bufsize = 1024 };
-  char err[bufsize] = { '\0' };
-
   assert(config != NULL);
 
   if (!config->bindurls) {
-    snprintf(err, bufsize, "'bindurls' not set in config");
-    goto error;
+    snprintf(config->error, sizeof(config->error), "'bindurls' not set in config");
+    return 1;
   }
   if (!config->basedn) {
-    snprintf(err, bufsize, "'basedn' not set in config");
-    goto error;
+    snprintf(config->error, sizeof(config->error), "'basedn' not set in config");
+    return 1;
   }
   if (!config->userfilter) {
-    snprintf(err, bufsize, "'userfilter' not set in config");
-    goto error;
+    snprintf(config->error, sizeof(config->error), "'userfilter' not set in config");
+    return 1;
   }
   if (config->binddn && !config->bindpass) {
-    snprintf(err, bufsize, "'bindn' set, but 'bindpass' missing in config");
-    goto error;
+    snprintf(config->error, sizeof(config->error), "'bindn' set, but 'bindpass' missing in config");
+    return 1;
   }
 
   return 0;
-
-  error:
-  config->error = strndup(err, bufsize);
-  return 1;
 }
