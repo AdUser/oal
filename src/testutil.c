@@ -37,7 +37,6 @@ int main(int argc, char *argv[]) {
       fputs("ok\n", stdout);
     } else {
       fprintf(stderr, "fail: %s\n", config->error);
-      free(config->error);
     }
   }
 
