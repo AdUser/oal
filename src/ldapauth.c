@@ -70,6 +70,7 @@ oal_connect(LDAP * ld,
 }
 
 /**
+ * @brief  find user by name in ldap directory and tries to bind with given pass
  * @returns 1 if user pass the check, 0 on password mismatch and -1 on error
  */
 int
@@ -77,43 +78,57 @@ oal_check_cred(oal_config_t * const config,
                const char * const username,
                const char * const password)
 {
-  LDAP *ld = NULL;
+  LDAP *sld = NULL;        /* used for user search, read as 'search ldap descriptor' */
+  LDAP *ald = NULL;        /* used for user search, read as 'auth ldap descriptor' */
   LDAPMessage *res = NULL; /* whole search result */
   LDAPMessage *msg = NULL; /* first message from search result */
   char *searchattr[] = { (char *) LDAP_NO_ATTRS, NULL };
   char *udn = NULL; /* DN of found user */
-  int rc = 0;
+  int lrc = 0;      /* return code for ldap operations, read as 'ldap return code' */
+  int rc = -1;      /* function return code */
 
-  if ((oal_connect(ld, config, config->binddn, config->bindpass)) != 0)
+  if ((oal_connect(sld, config, config->binddn, config->bindpass)) != 0)
     return -1; /* error text already set inside oal_connect() */
 
-  rc = ldap_search_s(ld, config->basedn, LDAP_SCOPE_SUBTREE, config->userfilter, searchattr, 1, &res);
-  if (rc != LDAP_SUCCESS) {
+  /* TODO: expand searchfilter */
+
+  lrc = ldap_search_s(sld, config->basedn, LDAP_SCOPE_SUBTREE, config->userfilter, searchattr, 1, &res);
+  if (lrc != LDAP_SUCCESS) {
     snprintf(config->error, sizeof(config->error), "ldap search failed: %s", ldap_err2string(rc));
-    goto error; /* TODO */
+    goto cleanup; /* TODO */
   }
 
-  if (ldap_count_messages(ld, res) <= 0) {
-    ldap_msgfree(res);
-    return 0; /* no such user or error */
+  lrc = ldap_count_messages(sld, res);
+  if (lrc <= 0) {
+    if (lrc == 0) {
+      snprintf(config->error, sizeof(config->error), "user not found");
+      rc = 0;
+    }
+    goto cleanup;
   }
 
-  if ((msg = ldap_first_message(ld, res)) == NULL) {
+  if ((msg = ldap_first_message(sld, res)) == NULL) {
     snprintf(config->error, sizeof(config->error), "ldap search found something, but can't get result");
-    goto error;
+    goto cleanup;
   }
 
-  if ((udn = ldap_get_dn(ld, msg)) == NULL) {
+  if ((udn = ldap_get_dn(sld, msg)) == NULL) {
     snprintf(config->error, sizeof(config->error), "can't get DN of found user");
-    goto error;
+    goto cleanup;
   }
 
-  return 1;
+  if (oal_connect(ald, config, udn, password) == 0) {
+    rc = 1;
+    ldap_unbind(ald);
+    goto cleanup;
+  } else {
+    rc = 0;
+  }
 
-  error:
+  cleanup:
   if (res) ldap_msgfree(res);
   if (msg) ldap_msgfree(msg);
   if (udn) ldap_memfree(udn);
-  if (ld)  ldap_unbind(ld);
-  return -1;
+  if (sld) ldap_unbind(sld);
+  return rc;
 }
