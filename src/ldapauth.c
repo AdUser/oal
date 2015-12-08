@@ -121,8 +121,24 @@ oal_check_cred(oal_config_t * const config,
   char *udn = NULL; /* DN of found user */
   int lrc = 0;      /* return code for ldap operations, read as 'ldap return code' */
   int rc = -1;      /* function return code */
+  char uid[128];     /* escaped username */
+  char filter[2048]; /* basic ldap filter, combined with uid */
 
-  if ((oal_connect(sld, config, config->binddn, config->bindpass)) != 0)
+  assert(config   != NULL);
+  assert(username != NULL);
+  assert(password != NULL);
+
+  if (oal_ldap_escape(uid, sizeof(uid), username) < 0) {
+    snprintf(config->error, sizeof(config->error), "can't escape username: it's too long");
+    return -1;
+  }
+
+  if (snprintf(filter, sizeof(filter), config->userfilter, uid, uid) >= (int) sizeof(filter)) {
+    snprintf(config->error, sizeof(config->error), "can't interpolate userfilter: lack of space");
+    return -1;
+  }
+
+  if ((oal_connect(&sld, config, config->binddn, config->bindpass)) != 0)
     return -1; /* error text already set inside oal_connect() */
 
   /* TODO: expand searchfilter */
