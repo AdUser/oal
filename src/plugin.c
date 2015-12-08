@@ -102,6 +102,5 @@ openvpn_plugin_close_v1 (openvpn_plugin_handle_t handle)
   free(config->bindpass);
   free(config->basedn);
   free(config->userfilter);
-  free(config->error);
   free(config);
 }
