@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
       fputs("fail: expected '<username> <password>' line\n", stdout);
       continue;
     }
-    if (oal_check_cred(config, username, password) == 0) {
+    if (oal_check_cred(config, username, password) > 0) {
       fputs("ok\n", stdout);
     } else {
       fprintf(stderr, "fail: %s\n", config->error);
