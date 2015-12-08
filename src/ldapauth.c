@@ -11,6 +11,40 @@
 #include "config.h"
 
 /**
+ * @brief  escape chars, having special meaning in ldap search filter
+ * @returns >= 0 if escaped successfully, -1 on error
+ */
+size_t
+oal_ldap_escape(char *dst, size_t size, const char *src)
+{
+  char c = '\0';
+  size_t pos = 0;
+
+  assert(dst != NULL);
+  assert(src != NULL);
+  assert(size > 0);
+
+  while ((c = *src) != '\0') {
+    if (c == '*' || c == '(' || c == ')' || c == '\\') {
+      if (size > 3) {
+        *dst = snprintf(dst, 3, "\\%02x", (unsigned char) c);
+      } else {
+        return -1;
+      }
+      src += 1, dst += 3, pos += 3, size -= 3;
+    } else {
+      *dst = *src;
+      src += 1, dst += 1, pos += 1, size -= 1;
+    }
+    if (size == 0)
+      return -1;
+  }
+  *dst = '\0';
+
+  return pos;
+}
+
+/**
  * @brief  open connection to ldap server
  * @returns 1 on success, 0 on error and fills config->error
  */
