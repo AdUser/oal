@@ -9,14 +9,15 @@
 
 #include "config.h"
 
-/** shared connection, used for searching users and
- * comparing their passwords if mode set to 'compare'
- * @returns 0 on success, 1 on error
+/**
+ * @brief  open connection to ldap server
+ * @returns 1 on success, 0 on error and fills config->error
  */
-LDAP *ld = NULL;
-
 int
-oal_connect(oal_config_t * const config)
+oal_connect(LDAP * ld,
+            oal_config_t * const config,
+            const char * const binddn,
+            const char * const bindpass)
 {
   const short int ldapver = LDAP_VERSION3;
   const short int sizelimit = 5;
@@ -60,7 +61,7 @@ oal_connect(oal_config_t * const config)
     return 1;
   }
 
-  if((rc = ldap_simple_bind_s(ld, config->binddn, config->bindpass)) != LDAP_SUCCESS) {
+  if ((rc = ldap_simple_bind_s(ld, binddn, bindpass)) != LDAP_SUCCESS) {
     snprintf(config->error, sizeof(config->error), "can't bind to ldap server: %s", ldap_err2string(rc));
     return 1;
   }
@@ -76,13 +77,14 @@ oal_check_cred(oal_config_t * const config,
                const char * const username,
                const char * const password)
 {
+  LDAP *ld = NULL;
   LDAPMessage *res = NULL; /* whole search result */
   LDAPMessage *msg = NULL; /* first message from search result */
   char *searchattr[] = { (char *) LDAP_NO_ATTRS, NULL };
   char *udn = NULL; /* DN of found user */
   int rc = 0;
 
-  if (!ld && !oal_connect(config))
+  if ((oal_connect(ld, config, config->binddn, config->bindpass)) != 0)
     return -1; /* error text already set inside oal_connect() */
 
   rc = ldap_search_s(ld, config->basedn, LDAP_SCOPE_SUBTREE, config->userfilter, searchattr, 1, &res);
@@ -112,5 +114,6 @@ oal_check_cred(oal_config_t * const config,
   if (res) ldap_msgfree(res);
   if (msg) ldap_msgfree(msg);
   if (udn) ldap_memfree(udn);
+  if (ld)  ldap_unbind(ld);
   return -1;
 }
