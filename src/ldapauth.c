@@ -60,7 +60,7 @@ oal_connect(LDAP ** ld,
   int rc = 0;
 
   if ((rc = ldap_initialize(ld, config->bindurls)) != LDAP_SUCCESS) {
-    snprintf(config->error, sizeof(config->error), "can't connnect to ldap server(s): %s", strerror(errno));
+    snprintf(config->error, sizeof(config->error), "can't connect to ldap server(s): %s", strerror(errno));
     return 1;
   }
 
