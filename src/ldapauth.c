@@ -25,6 +25,7 @@ oal_connect(oal_config_t * const config)
 
   if ((rc = ldap_initialize(&ld, config->bindurls)) != LDAP_SUCCESS) {
     snprintf(config->error, sizeof(config->error), "can't connnect to ldap server(s): %s", strerror(errno));
+    return 1;
   }
 
   if (config->bindtimeout)
@@ -33,41 +34,38 @@ oal_connect(oal_config_t * const config)
   /* hardcoded options */
   if (ldap_set_option(ld, LDAP_OPT_PROTOCOL_VERSION, &ldapver) != LDAP_OPT_SUCCESS) {
     snprintf(config->error, sizeof(config->error), "can't set ldap protocol version");
-    goto error;
+    return 1;
   }
   if (ldap_set_option(ld, LDAP_OPT_SIZELIMIT, &sizelimit) != LDAP_OPT_SUCCESS) {
     snprintf(config->error, sizeof(config->error), "can't set max results limit");
-    goto error;
+    return 1;
   }
   /* timeouts */
   if (ldap_set_option(ld, LDAP_OPT_NETWORK_TIMEOUT, &tv) != LDAP_OPT_SUCCESS) {
     snprintf(config->error, sizeof(config->error), "can't set network timeout: %d", config->bindtimeout);
-    goto error;
+    return 1;
   }
   if (ldap_set_option(ld, LDAP_OPT_TIMEOUT,         &tv) != LDAP_OPT_SUCCESS) {
     snprintf(config->error, sizeof(config->error), "can't set search timeout: %d", config->bindtimeout);
-    goto error;
+    return 1;
   }
   /* TODO: hardcoded */
   if (ldap_set_option(ld, LDAP_OPT_REFERRALS, LDAP_OPT_OFF) != LDAP_OPT_SUCCESS) {
     snprintf(config->error, sizeof(config->error), "can't set follow referrals to 'off'");
-    goto error;
+    return 1;
   }
   /* required */
   if (ldap_set_option(ld, LDAP_OPT_DEFBASE,   config->basedn) != LDAP_OPT_SUCCESS) {
     snprintf(config->error, sizeof(config->error), "can't set searchbase: %s", config->basedn);
-    goto error;
+    return 1;
   }
 
   if((rc = ldap_simple_bind_s(ld, config->binddn, config->bindpass)) != LDAP_SUCCESS) {
     snprintf(config->error, sizeof(config->error), "can't bind to ldap server: %s", ldap_err2string(rc));
-    goto error;
+    return 1;
   }
 
   return 0; /* success */
-
-  error:
-  return 1;
 }
 
 /**
