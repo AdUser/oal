@@ -46,7 +46,7 @@ oal_ldap_escape(char *dst, size_t size, const char *src)
 
 /**
  * @brief  open connection to ldap server
- * @returns 1 on success, 0 on error and fills config->error
+ * @returns 0 on success, >0 on error and fills config->error
  */
 int
 oal_connect(LDAP ** ld,
