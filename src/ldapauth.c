@@ -155,7 +155,7 @@ oal_check_cred(oal_config_t * const config,
     goto cleanup; /* TODO */
   }
 
-  lrc = ldap_count_messages(sld, res);
+  lrc = ldap_count_entries(sld, res);
   if (lrc <= 0) {
     if (lrc == 0) {
       snprintf(config->error, sizeof(config->error), "user not found");
@@ -175,15 +175,18 @@ oal_check_cred(oal_config_t * const config,
 
     if ((udn = ldap_get_dn(sld, msg)) == NULL || strlen(udn) == 0) {
       snprintf(config->error, sizeof(config->error), "can't get DN of found user");
-      continue;
+      break;
     }
+fprintf(stderr, "dn: %s\n", udn);
 
     if (oal_connect(&ald, config, udn, password) == 0) {
       rc = 1;
       ldap_unbind(ald);
       break; /* success */
     } else {
+      snprintf(config->error, sizeof(config->error), "password mismatch");
       rc = 0;
+      break;
     }
     ldap_memfree(udn), udn = NULL;
   } while ((msg = ldap_next_message(sld, msg)) != NULL);
