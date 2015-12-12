@@ -162,27 +162,32 @@ oal_check_cred(oal_config_t * const config,
     goto cleanup;
   }
 
-  if ((msg = ldap_first_message(sld, res)) == NULL) {
+  if ((msg = ldap_first_entry(sld, res)) == NULL) {
     snprintf(config->error, sizeof(config->error), "ldap search found something, but can't get result");
     goto cleanup;
   }
 
-  if ((udn = ldap_get_dn(sld, msg)) == NULL) {
-    snprintf(config->error, sizeof(config->error), "can't get DN of found user");
-    goto cleanup;
-  }
+  do {
+    if (ldap_msgtype(msg) != LDAP_RES_SEARCH_RESULT)
+      continue;
 
-  if (oal_connect(&ald, config, udn, password) == 0) {
-    rc = 1;
-    ldap_unbind(ald);
-    goto cleanup;
-  } else {
-    rc = 0;
-  }
+    if ((udn = ldap_get_dn(sld, msg)) == NULL || strlen(udn) == 0) {
+      snprintf(config->error, sizeof(config->error), "can't get DN of found user");
+      continue;
+    }
+
+    if (oal_connect(&ald, config, udn, password) == 0) {
+      rc = 1;
+      ldap_unbind(ald);
+      break; /* success */
+    } else {
+      rc = 0;
+    }
+    ldap_memfree(udn), udn = NULL;
+  } while ((msg = ldap_next_message(sld, msg)) != NULL);
 
   cleanup:
   if (res) ldap_msgfree(res);
-  if (msg) ldap_msgfree(msg);
   if (udn) ldap_memfree(udn);
   if (sld) ldap_unbind(sld);
   return rc;
