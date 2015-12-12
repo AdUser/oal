@@ -10,6 +10,10 @@
 
 #include "config.h"
 
+#ifndef LDAP_DEBUG_CONNS
+#define LDAP_DEBUG_CONNS 0x8
+#endif
+
 /**
  * @brief  escape chars, having special meaning in ldap search filter
  * @returns >= 0 if escaped successfully, -1 on error
@@ -68,7 +72,7 @@ oal_connect(LDAP ** ld,
   if (config->bindtimeout)
     tv.tv_sec = config->bindtimeout;
   if (config->debug)
-    ldapdebug = 256; /* TODO: LDAP_DEBUG_CONNS */
+    ldapdebug = LDAP_DEBUG_CONNS;
 
   /* hardcoded options */
   if (ldap_set_option(*ld, LDAP_OPT_PROTOCOL_VERSION, &ldapver) != LDAP_OPT_SUCCESS) {
