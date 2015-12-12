@@ -90,6 +90,10 @@ oal_connect(LDAP ** ld,
     snprintf(config->error, sizeof(config->error), "can't set follow referrals to 'off'");
     return 1;
   }
+  if (ldap_set_option(*ld, LDAP_OPT_DEBUG_LEVEL, config->debug ? LDAP_OPT_ON : LDAP_OPT_OFF)) {
+    snprintf(config->error, sizeof(config->error), "can't set debug level for ldap conn");
+    return 1;
+  }
   /* required */
   if (ldap_set_option(*ld, LDAP_OPT_DEFBASE,   config->basedn) != LDAP_OPT_SUCCESS) {
     snprintf(config->error, sizeof(config->error), "can't set searchbase: %s", config->basedn);
