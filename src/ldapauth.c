@@ -56,6 +56,7 @@ oal_connect(LDAP ** ld,
 {
   const short int ldapver = LDAP_VERSION3;
   const short int sizelimit = 5;
+  unsigned int ldapdebug = 0;
   struct timeval tv = { 30, 0 };
   int rc = 0;
 
@@ -66,6 +67,8 @@ oal_connect(LDAP ** ld,
 
   if (config->bindtimeout)
     tv.tv_sec = config->bindtimeout;
+  if (config->debug)
+    ldapdebug = 256; /* TODO: LDAP_DEBUG_CONNS */
 
   /* hardcoded options */
   if (ldap_set_option(*ld, LDAP_OPT_PROTOCOL_VERSION, &ldapver) != LDAP_OPT_SUCCESS) {
@@ -74,6 +77,10 @@ oal_connect(LDAP ** ld,
   }
   if (ldap_set_option(*ld, LDAP_OPT_SIZELIMIT, &sizelimit) != LDAP_OPT_SUCCESS) {
     snprintf(config->error, sizeof(config->error), "can't set max results limit");
+    return 1;
+  }
+  if (ldap_set_option(*ld, LDAP_OPT_REFERRALS, LDAP_OPT_OFF) != LDAP_OPT_SUCCESS) {
+    snprintf(config->error, sizeof(config->error), "can't set follow referrals to 'off'");
     return 1;
   }
   /* timeouts */
@@ -85,12 +92,7 @@ oal_connect(LDAP ** ld,
     snprintf(config->error, sizeof(config->error), "can't set search timeout: %d", config->bindtimeout);
     return 1;
   }
-  /* TODO: hardcoded */
-  if (ldap_set_option(*ld, LDAP_OPT_REFERRALS, LDAP_OPT_OFF) != LDAP_OPT_SUCCESS) {
-    snprintf(config->error, sizeof(config->error), "can't set follow referrals to 'off'");
-    return 1;
-  }
-  if (ldap_set_option(*ld, LDAP_OPT_DEBUG_LEVEL, config->debug ? LDAP_OPT_ON : LDAP_OPT_OFF) != LDAP_OPT_SUCCESS) {
+  if (ldap_set_option(*ld, LDAP_OPT_DEBUG_LEVEL, &ldapdebug) != LDAP_OPT_SUCCESS) {
     snprintf(config->error, sizeof(config->error), "can't set debug level for ldap conn");
     return 1;
   }
