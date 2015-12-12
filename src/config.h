@@ -7,6 +7,7 @@ typedef struct {
   char   *bindpass;      /** bind with this password */
   size_t  bindtimeout;   /** bind timeout */
   char   *basedn;        /** where to search for users */
+  short   debug;         /** enable ldap debug */
   char   *userfilter;    /** ldap filter for user entry */
   char    error[1024];   /** parser error */
 } oal_config_t;

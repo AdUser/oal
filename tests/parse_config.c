@@ -16,6 +16,7 @@ int main(void) {
   }
 
   assert(config.bindtimeout == 5);
+  assert(config.debug == 1);
   assert(strcmp(config.bindpass,   "strong-password") == 0);
   assert(strcmp(config.bindurls,   "ldap://127.0.0.1 ldaps://172.16.17.1") == 0);
   assert(strcmp(config.binddn,     "cn=admin,dc=example,dc=com") == 0);

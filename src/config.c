@@ -72,6 +72,9 @@ int parse_config(oal_config_t * const config, const char *file) {
     if (strncmp(key, "bindtimeout", 11) == 0) {
       config->bindtimeout = atoi(value);
     } else
+    if (strncmp(key, "debug", 5) == 0) {
+      config->debug = !!atoi(value);
+    } else
     if (strncmp(key, "basedn", 6) == 0) {
       config->basedn = strndup(value, valsize);
     } else
