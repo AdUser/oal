@@ -147,7 +147,7 @@ oal_check_cred(oal_config_t * const config,
 
   /* TODO: expand searchfilter */
 
-  lrc = ldap_search_s(sld, config->basedn, LDAP_SCOPE_SUBTREE, config->userfilter, searchattr, 1, &res);
+  lrc = ldap_search_s(sld, config->basedn, LDAP_SCOPE_SUBTREE, filter, searchattr, 1, &res);
   if (lrc != LDAP_SUCCESS) {
     snprintf(config->error, sizeof(config->error), "ldap search failed: %s", ldap_err2string(lrc));
     goto cleanup; /* TODO */
