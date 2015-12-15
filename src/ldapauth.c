@@ -174,7 +174,7 @@ oal_check_cred(oal_config_t * const config,
   }
 
   do {
-    if (ldap_msgtype(msg) != LDAP_RES_SEARCH_RESULT)
+    if (ldap_msgtype(msg) != LDAP_RES_SEARCH_ENTRY)
       continue;
 
     if ((udn = ldap_get_dn(sld, msg)) == NULL || strlen(udn) == 0) {
