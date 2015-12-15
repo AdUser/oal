@@ -126,7 +126,7 @@ oal_check_cred(oal_config_t * const config,
   LDAP *sld = NULL;        /* used for user search, read as 'search ldap descriptor' */
   LDAP *ald = NULL;        /* used for user search, read as 'auth ldap descriptor' */
   LDAPMessage *res = NULL; /* whole search result */
-  LDAPMessage *msg = NULL; /* first message from search result */
+  LDAPMessage *msg = NULL; /* first entry from search result */
   char *searchattr[] = { (char *) LDAP_NO_ATTRS, NULL };
   char *udn = NULL; /* DN of found user */
   int lrc = 0;      /* return code for ldap operations, read as 'ldap return code' */
