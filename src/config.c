@@ -29,10 +29,8 @@ int parse_config(oal_config_t * const config, const char *file) {
   assert(config != NULL);
   assert(file   != NULL);
 
-  if ((f = fopen(file, "r")) == NULL) {
-    snprintf(config->error, sizeof(config->error), "can't open file: %s", strerror(errno));
-    return 1;
-  }
+  if ((f = fopen(file, "r")) == NULL)
+    return oal_error(config, "can't open file: %s", strerror(errno));
 
   while (fgets(buf, bufsize, f)) {
     linenum++;
@@ -44,25 +42,19 @@ int parse_config(oal_config_t * const config, const char *file) {
       continue; /* ignore comments */
     if (strlen(key) == 0)
       continue; /* ignore empty lines */
-    if (!isalpha(*key)) {
-      snprintf(config->error, sizeof(config->error), "can't parse line %d", linenum);
-      return 1;
-    }
+    if (!isalpha(*key))
+      return oal_error(config, "can't parse line %d", linenum);
     /* find start of value */
     value = key;
     while(*value && !isspace(*value))
       value++;
-    if (!isspace(*value)) {
-      snprintf(config->error, sizeof(config->error), "can't find value at line %d", linenum);
-      return 1;
-    }
+    if (!isspace(*value))
+      return oal_error(config, "can't find value at line %d", linenum);
     *value = '\0', value += 1;
     while (isspace(*value))
       value++;
-    if (!*value) {
-      snprintf(config->error, sizeof(config->error), "can't find value at line %d", linenum);
-      return 1;
-    }
+    if (!*value)
+      return oal_error(config, "can't find value at line %d", linenum);
     /* strip trailing spaces and newline */
     valsize = strnlen(value, bufsize - (value - buf));
     while (valsize && isspace(value[valsize - 1])) {
@@ -90,10 +82,8 @@ int parse_config(oal_config_t * const config, const char *file) {
     } else
     if (strncmp(key, "userfilter", 10) == 0) {
       config->userfilter = strndup(value, valsize);
-    } else
-    {
-      snprintf(config->error, sizeof(config->error), "unknown key '%s' at line %d", key, linenum);
-      return 1;
+    } else {
+      return oal_error(config, "unknown key '%s' at line %d", key, linenum);
     }
   }
 
@@ -103,22 +93,14 @@ int parse_config(oal_config_t * const config, const char *file) {
 int check_config(oal_config_t * const config) {
   assert(config != NULL);
 
-  if (!config->bindurls) {
-    snprintf(config->error, sizeof(config->error), "'bindurls' not set in config");
-    return 1;
-  }
-  if (!config->basedn) {
-    snprintf(config->error, sizeof(config->error), "'basedn' not set in config");
-    return 1;
-  }
-  if (!config->userfilter) {
-    snprintf(config->error, sizeof(config->error), "'userfilter' not set in config");
-    return 1;
-  }
-  if (config->binddn && !config->bindpass) {
-    snprintf(config->error, sizeof(config->error), "'bindn' set, but 'bindpass' missing in config");
-    return 1;
-  }
+  if (!config->bindurls)
+    return oal_error(config, "'bindurls' not set in config");
+  if (!config->basedn)
+    return oal_error(config, "'basedn' not set in config");
+  if (!config->userfilter)
+    return oal_error(config, "'userfilter' not set in config");
+  if (config->binddn && !config->bindpass)
+    return oal_error(config, "'bindn' set, but 'bindpass' missing in config");
 
   return 0;
 }

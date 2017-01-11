@@ -65,7 +65,7 @@ oal_connect(LDAP ** ld,
   int rc = 0;
 
   if ((rc = ldap_initialize(ld, config->bindurls)) != LDAP_SUCCESS) {
-    snprintf(config->error, sizeof(config->error), "can't connect to ldap server(s): %s", strerror(errno));
+    oal_error(config, "can't connect to ldap server(s): %s", strerror(errno));
     return 1;
   }
 
@@ -76,38 +76,38 @@ oal_connect(LDAP ** ld,
 
   /* hardcoded options */
   if (ldap_set_option(*ld, LDAP_OPT_PROTOCOL_VERSION, &ldapver) != LDAP_OPT_SUCCESS) {
-    snprintf(config->error, sizeof(config->error), "can't set ldap protocol version");
+    oal_error(config, "can't set ldap protocol version");
     return 1;
   }
   if (ldap_set_option(*ld, LDAP_OPT_SIZELIMIT, &sizelimit) != LDAP_OPT_SUCCESS) {
-    snprintf(config->error, sizeof(config->error), "can't set max results limit");
+    oal_error(config, "can't set max results limit");
     return 1;
   }
   if (ldap_set_option(*ld, LDAP_OPT_REFERRALS, LDAP_OPT_OFF) != LDAP_OPT_SUCCESS) {
-    snprintf(config->error, sizeof(config->error), "can't set follow referrals to 'off'");
+    oal_error(config, "can't set follow referrals to 'off'");
     return 1;
   }
   /* timeouts */
   if (ldap_set_option(*ld, LDAP_OPT_NETWORK_TIMEOUT, &tv) != LDAP_OPT_SUCCESS) {
-    snprintf(config->error, sizeof(config->error), "can't set network timeout: %d", config->bindtimeout);
+    oal_error(config, "can't set network timeout: %d", config->bindtimeout);
     return 1;
   }
   if (ldap_set_option(*ld, LDAP_OPT_TIMEOUT,         &tv) != LDAP_OPT_SUCCESS) {
-    snprintf(config->error, sizeof(config->error), "can't set search timeout: %d", config->bindtimeout);
+    oal_error(config, "can't set search timeout: %d", config->bindtimeout);
     return 1;
   }
   if (ldap_set_option(*ld, LDAP_OPT_DEBUG_LEVEL, &ldapdebug) != LDAP_OPT_SUCCESS) {
-    snprintf(config->error, sizeof(config->error), "can't set debug level for ldap conn");
+    oal_error(config, "can't set debug level for ldap conn");
     return 1;
   }
   /* required */
   if (ldap_set_option(*ld, LDAP_OPT_DEFBASE,   config->basedn) != LDAP_OPT_SUCCESS) {
-    snprintf(config->error, sizeof(config->error), "can't set searchbase: %s", config->basedn);
+    oal_error(config, "can't set searchbase: %s", config->basedn);
     return 1;
   }
 
   if ((rc = ldap_simple_bind_s(*ld, binddn, bindpass)) != LDAP_SUCCESS) {
-    snprintf(config->error, sizeof(config->error), "can't bind to ldap server: %s", ldap_err2string(rc));
+    oal_error(config, "can't bind to ldap server: %s", ldap_err2string(rc));
     return 1;
   }
 
@@ -139,12 +139,12 @@ oal_check_cred(oal_config_t * const config,
   assert(password != NULL);
 
   if (oal_ldap_escape(uid, sizeof(uid), username) < 0) {
-    snprintf(config->error, sizeof(config->error), "can't escape username: it's too long");
+    oal_error(config, "can't escape username: it's too long");
     return -1;
   }
 
   if (snprintf(filter, sizeof(filter), config->userfilter, uid, uid) >= (int) sizeof(filter)) {
-    snprintf(config->error, sizeof(config->error), "can't interpolate userfilter: lack of space");
+    oal_error(config, "can't interpolate userfilter: lack of space");
     return -1;
   }
 
@@ -155,21 +155,21 @@ oal_check_cred(oal_config_t * const config,
 
   lrc = ldap_search_s(sld, config->basedn, LDAP_SCOPE_SUBTREE, filter, searchattr, 1, &res);
   if (lrc != LDAP_SUCCESS) {
-    snprintf(config->error, sizeof(config->error), "ldap search failed: %s", ldap_err2string(lrc));
+    oal_error(config, "ldap search failed: %s", ldap_err2string(lrc));
     goto cleanup; /* TODO */
   }
 
   lrc = ldap_count_entries(sld, res);
   if (lrc <= 0) {
     if (lrc == 0) {
-      snprintf(config->error, sizeof(config->error), "user not found");
+      oal_error(config, "user not found");
       rc = 0;
     }
     goto cleanup;
   }
 
   if ((msg = ldap_first_entry(sld, res)) == NULL) {
-    snprintf(config->error, sizeof(config->error), "ldap search found something, but can't get result");
+    oal_error(config, "ldap search found something, but can't get result");
     goto cleanup;
   }
 
@@ -178,7 +178,7 @@ oal_check_cred(oal_config_t * const config,
       continue;
 
     if ((udn = ldap_get_dn(sld, msg)) == NULL || strlen(udn) == 0) {
-      snprintf(config->error, sizeof(config->error), "can't get DN of found user");
+      oal_error(config, "can't get DN of found user");
       break;
     }
 fprintf(stderr, "dn: %s\n", udn);
@@ -188,7 +188,7 @@ fprintf(stderr, "dn: %s\n", udn);
       ldap_unbind(ald);
       break; /* success */
     } else {
-      snprintf(config->error, sizeof(config->error), "password mismatch");
+      oal_error(config, "password mismatch");
       rc = 0;
       break;
     }
