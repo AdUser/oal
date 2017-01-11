@@ -12,6 +12,9 @@ typedef struct {
   char    error[1024];   /** parser error */
 } oal_config_t;
 
+int oal_error(oal_config_t * const c, const char *fmt, ...)
+__attribute__ ((format (printf, 2, 3)));
+
 int parse_config(oal_config_t * const config, const char *file);
 int check_config(oal_config_t * const config);
 

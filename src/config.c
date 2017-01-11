@@ -3,11 +3,21 @@
 #include <errno.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <stdlib.h>
 
 #include "config.h"
 
 enum { bufsize = 1024 };
+
+int
+oal_error(oal_config_t * const c, const char *fmt, ...) {
+  va_list args;
+  va_start(args, fmt);
+  vsnprintf(c->error, sizeof(c->error), fmt, args);
+  va_end(args);
+  return 1;
+}
 
 int parse_config(oal_config_t * const config, const char *file) {
   FILE *f;
