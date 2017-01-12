@@ -1,5 +1,11 @@
-#ifndef OAL_CONFIG_H_INCLUDED
-#define OAL_CONFIG_H_INCLUDED
+/* Copyright 2015-2016 Alex 'AdUser' Z (ad_user@runbox.com)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+#ifndef OAL_CONFIG_H
+#define OAL_CONFIG_H
 
 typedef struct {
   char   *bindurls;      /** space-separated list ldap of URIs */
@@ -18,4 +24,4 @@ __attribute__ ((format (printf, 2, 3)));
 int parse_config(oal_config_t * const config, const char *file);
 int check_config(oal_config_t * const config);
 
-#endif /* OAL_CONFIG_H_INCLUDED */
+#endif /* OAL_CONFIG_H */
