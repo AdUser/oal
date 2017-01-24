@@ -46,7 +46,7 @@ Example config:
 
 ...where %u is a placeholder for username.
 You may test your config with special tool, named `oal-test`.
-This tool takes lines with username and password, separated by space and will say is this pair valid or not.
+This tool takes line with username and password separated by space(s) and says is auth successfull or not.
 
 If everything works fine, you'll can continue.
 
