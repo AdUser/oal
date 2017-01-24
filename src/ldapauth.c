@@ -149,7 +149,7 @@ oal_check_cred(oal_config_t * const config,
     return -1;
   }
 
-  if (snprintf(filter, sizeof(filter), config->userfilter, uid, uid) >= (int) sizeof(filter)) {
+  if (snprintf(filter, sizeof(filter), config->userfilter, uid) >= (int) sizeof(filter)) {
     oal_error(config, "can't interpolate userfilter: lack of space");
     return -1;
   }
