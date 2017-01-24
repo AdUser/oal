@@ -11,11 +11,17 @@ option(WITH_HARDENING "Enable hardening options" ON)
 if (NOT DEFINED CMAKE_INSTALL_PREFIX)
   set(CMAKE_INSTALL_PREFIX "/usr")
 endif ()
-set(INSTALL_LIB "${CMAKE_INSTALL_PREFIX}/lib/openvpn")
+# HACK: cmake >= 3.4 fixes this
+if (CMAKE_INSTALL_PREFIX MATCHES "^/usr/?$")
+  set(CMAKE_INSTALL_SYSCONFDIR "/etc")
+  set(CMAKE_INSTALL_LOCALSTATEDIR "/var")
+endif ()
 
-list(APPEND CMAKE_C_FLAGS "-Wall -Wextra -pedantic")
+include(GNUInstallDirs)
 
 find_library(LIBLDAP NAMES "ldap")
+
+list(APPEND CMAKE_C_FLAGS "-Wall -Wextra -pedantic")
 
 if (WITH_HARDENING)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wformat -Wformat-security -Werror=format-security" )
@@ -25,11 +31,12 @@ endif ()
 
 message(STATUS "------------------------------------------")
 message(STATUS "Build type is:        ${CMAKE_BUILD_TYPE}")
-message(STATUS "")
-message(STATUS "Install prefix:       ${CMAKE_INSTALL_PREFIX}")
-message(STATUS "Library directory:    ${INSTALL_LIB}")
-message(STATUS "")
-message(STATUS "ldap:                 ${LIBLDAP}")
+message(STATUS "Paths:")
+message(STATUS "- prefix:  ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "- binary:  ${CMAKE_INSTALL_FULL_BINDIR}")
+message(STATUS "- library: ${CMAKE_INSTALL_FULL_LIBDIR}")
+message(STATUS "Libraries:")
+message(STATUS "- ldap: ${LIBLDAP}")
 
 add_subdirectory (src)
 add_subdirectory (tests)
