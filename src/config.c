@@ -87,6 +87,18 @@ int parse_config(oal_config_t * const config, const char *file) {
       config->basedn = strndup(value, valsize);
     } else
     if (strncmp(key, "userfilter", 10) == 0) {
+      char *p = value;
+      size_t matches = 0;
+      while ((p = strchr(p, '%')) != NULL) {
+        if (strncmp(p, "%u", 2) == 0) {
+          p++, *p = 's'; /* %u -> %s */
+          matches++;
+        } else {
+          return oal_error(config, "unknown placeholder in userfilter here -> %s", p);
+        }
+      }
+      if (matches > 1)
+        return oal_error(config, "multiple '%%u' placeholders in userfilter");
       config->userfilter = strndup(value, valsize);
     } else {
       return oal_error(config, "unknown key '%s' at line %d", key, linenum);
