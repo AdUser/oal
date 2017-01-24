@@ -17,7 +17,7 @@ Build requirements:
 Installation
 ------------
 
-    cmake -DCMAKE_BUILD_TYPE=Release
+    cmake -DCMAKE_BUILD_TYPE=Release .
     make
     make test
     sudo make install
@@ -42,11 +42,17 @@ Example config:
     # where to search for users
     basedn OU=users,DC=example,DC=com
     # allow only users who match this filter
-    userfilter (&(objectClass=inetOrgPerson)(user=%s)(memberOf=CN=openvpn-users,CN=groups,DC=example,DC=com))
+    userfilter (&(objectClass=inetOrgPerson)(user=%u)(memberOf=CN=openvpn-users,CN=groups,DC=example,DC=com))
 
-Then, you need move this config to secure place and make sure that only root can read it.
+...where %u is a placeholder for username.
+You may test your config with special tool, named `oal-test`.
+This tool takes lines with username and password, separated by space and will say is this pair valid or not.
 
-    install -m 0600 -o root -g root auth-ldap.conf /etc/openvpn/
+If everything works fine, you'll can continue.
+
+Next you need to move this config to secure place and make sure that only root can read it.
+
+    mv auth-ldap.conf /etc/openvpn/
     cd /etc/openvpn/
     chmod 600 auth-ldap.conf
     chown root:root auth-ldap.conf
@@ -54,7 +60,7 @@ Then, you need move this config to secure place and make sure that only root can
 Next, you need load your plugin in openvpn config.
 Add this line to actual config:
 
-    plugin /usr/lib/openvpn/oal.so "/etc/openvpn/auth-ldap.conf"
+    plugin /usr/lib/openvpn/openvpn-plugin-auth-ldap.so "/etc/openvpn/auth-ldap.conf"
 
 ... and restart oenvpn.
 
