@@ -187,7 +187,6 @@ oal_check_cred(oal_config_t * const config,
       oal_error(config, "can't get DN of found user");
       break;
     }
-fprintf(stderr, "dn: %s\n", udn);
 
     if (oal_connect(&ald, config, udn, password) == 0) {
       rc = 1;
