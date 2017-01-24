@@ -73,3 +73,5 @@ which written in obj-c and requires half of gnustep as deps.
 This project has no goal being 1:1 compatible with original.
 Also, some important features still missing (like SSL/TLS encryption).
 But it's works, and can save you from installing a bunch of GNUStep bloatware.
+
+If you want some feature or found a bug, please open an issue on github.
